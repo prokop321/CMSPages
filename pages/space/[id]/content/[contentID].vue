@@ -1,15 +1,44 @@
-<template v-if="spaces[spaceID] && currentMap">
-  <div class="flex justify-center px-4">
+<template>
+  <div
+    v-if="spaces[spaceID] && currentMap && spaces[spaceID][contentID]"
+    class="flex justify-center px-4"
+  >
     <div class="flex w-full max-w-7xl flex-col gap-4 py-8">
       <div
         v-if="spaces[spaceID] && spaces[spaceID][contentID]"
         v-for="key in Object.keys(currentMap.fields)"
       >
-        <Input
-          :type="map.spaces[spaceID].fields[key]"
+        <InputString
+          v-if="map.spaces[spaceID].fields[key] === 'string'"
+          :title="key"
+          v-model="spaces[spaceID][contentID][key]"
+          :key="key + '-string'"
+        />
+        <InputDate
+          v-else-if="map.spaces[spaceID].fields[key] === 'date'"
           v-model="spaces[spaceID][contentID][key]"
           :title="key"
-          :key="key"
+          :key="key + '-date'"
+        />
+
+        <InputMarkdown
+          v-else-if="map.spaces[spaceID].fields[key] === 'markdown'"
+          v-model="spaces[spaceID][contentID][key]"
+          :title="key"
+          :key="key + '-markdown'"
+        />
+        <InputImages
+          v-else-if="map.spaces[spaceID].fields[key] === 'images'"
+          v-model="spaces[spaceID][contentID][key]"
+          :title="key"
+          :key="key + '-images'"
+        />
+
+        <InputWeekSchedule
+          v-else-if="map.spaces[spaceID].fields[key] === 'weekSchedule'"
+          v-model="spaces[spaceID][contentID][key]"
+          :title="key"
+          :key="key + '-weekSchedule'"
         />
       </div>
       <div>

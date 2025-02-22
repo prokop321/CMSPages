@@ -238,6 +238,17 @@ const addContent = () => {
       obj[key] = newContentID.value;
       continue;
     }
+    if (map.value.spaces[spaceID].fields[key] === "images") {
+      obj[key] = [];
+      continue;
+    } else if (map.value.spaces[spaceID].fields[key] === "weekSchedule") {
+      obj[key] = {
+        day: 0,
+        start: 0,
+        duration: 0,
+      };
+      continue;
+    }
     obj[key] = "";
   }
 
