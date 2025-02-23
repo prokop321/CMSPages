@@ -8,7 +8,7 @@
         <div
           class="flex max-h-full w-full max-w-7xl flex-col overflow-y-auto rounded bg-background px-2 pb-2"
         >
-          <FilesSelector
+          <FileSelector
             accept="image"
             @close="imageSelector = false"
             v-model="value"
