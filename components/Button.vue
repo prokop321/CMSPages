@@ -30,7 +30,7 @@
             'hover:bg-primaryDark': true,
           }
     "
-    class="flex h-14 items-center justify-center rounded-xl border-primary p-4 text-background"
+    class="flex h-14 items-center justify-center rounded-xl border-primary p-4 text-background no-underline hover:text-background"
   >
     <slot />
   </NuxtLink>

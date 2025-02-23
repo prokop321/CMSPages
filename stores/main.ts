@@ -7,7 +7,7 @@ export const useMainStore = defineStore("main", () => {
     ghKey: "",
   });
 
-  const runtimeConfig = useRuntimeConfig();
+  const unsavedChanges = ref(false);
 
   const map = ref<SpacesMap>({ spaces: {}, files: {} });
   const bucket = ref<{ [key: string]: Blob | null }>({});
@@ -17,23 +17,30 @@ export const useMainStore = defineStore("main", () => {
     () => "https://" + cmsConfig.ghUser + ".github.io/" + cmsConfig.ghRepo,
   );
 
-  const loadContent = async (id: string) => {
-    if (spaces.value[id]) return spaces.value[id];
-    const contentFetch = await axios(
-      "https://" +
-        cmsConfig.ghUser +
-        ".github.io/" +
-        cmsConfig.ghRepo +
-        "/content/" +
-        id +
-        ".json",
-    ).catch((e) => {});
+  const loadContent = async (id: string): Promise<Space | false> => {
+    try {
+      if (spaces.value[id]) return spaces.value[id];
+      const contentFetch = await axios(
+        "https://" +
+          cmsConfig.ghUser +
+          ".github.io/" +
+          cmsConfig.ghRepo +
+          "/content/" +
+          id +
+          ".json",
+      ).catch((e) => {
+        console.error(e);
+      });
 
-    if (contentFetch && contentFetch.data) {
-      spaces.value[id] = contentFetch.data;
-      return contentFetch.data;
+      if (contentFetch && contentFetch.data) {
+        spaces.value[id] = contentFetch.data;
+        return contentFetch.data;
+      }
+      return false;
+    } catch (e) {
+      console.error(e);
+      return false;
     }
-    return false;
   };
 
   const uploadFiles = async (
@@ -41,15 +48,17 @@ export const useMainStore = defineStore("main", () => {
     contentType: "image",
   ): Promise<string[]> => {
     if (!map.value.files) map.value.files = {};
-    const fileNames: string[] = [];
+    const fileURLs: string[] = [];
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
+
       const fileFullName = file.name;
       const fileParts = fileFullName.split(".");
       const fileName = fileParts[0].replace(" ", "-");
       const fileType = fileParts[fileParts.length - 1];
       let fileNameIndex = 0;
 
+      // Check if file with same name exists
       while (
         map.value.files[
           fileName + (fileNameIndex ? "-" + fileNameIndex : "") + "." + fileType
@@ -57,16 +66,20 @@ export const useMainStore = defineStore("main", () => {
       ) {
         fileNameIndex++;
       }
+
       const finalFileName =
         fileName + (fileNameIndex ? "-" + fileNameIndex : "") + "." + fileType;
+
       bucket.value[finalFileName] = file;
+
       map.value.files[finalFileName] = {
         added: Date.now(),
         type: contentType,
       };
-      fileNames.push(finalFileName);
+
+      fileURLs.push("/bucket/" + finalFileName);
     }
-    return fileNames;
+    return fileURLs;
   };
 
   const deleteFiles = async (fileNames: string[]) => {
@@ -92,6 +105,7 @@ export const useMainStore = defineStore("main", () => {
   };
 
   const filePreviewer = (fileURl: string): string => {
+    if (!fileURl.startsWith("/bucket/")) return fileURl;
     const fileParts = fileURl.split("/");
     const fileName = fileParts[fileParts.length - 1];
     if (bucket.value[fileName])
@@ -128,6 +142,13 @@ export const useMainStore = defineStore("main", () => {
     );
   };
 
+  const loadLocal = async () => {
+    const localConfig = localStorage.getItem("cmsConfig");
+    if (localConfig) {
+      Object.assign(cmsConfig, JSON.parse(localConfig));
+    }
+  };
+
   watch(
     cmsConfig,
     async () => {
@@ -150,16 +171,10 @@ export const useMainStore = defineStore("main", () => {
     { deep: true },
   );
 
-  const loadLocal = async () => {
-    const localConfig = localStorage.getItem("cmsConfig");
-    if (localConfig) {
-      Object.assign(cmsConfig, JSON.parse(localConfig));
-    }
-  };
-
   loadLocal();
 
   return {
+    unsavedChanges,
     filePreviewer,
     deleteSpace,
     bucket,

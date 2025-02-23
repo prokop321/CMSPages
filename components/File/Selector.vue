@@ -9,23 +9,15 @@
       v-for="file in files"
       @add="
         () => {
-          emit('update:modelValue', [
-            ...(props.modelValue || []),
-            '/bucket/' + file.name,
-          ]);
+          value.push('/bucket/' + file.name);
         }
       "
       @remove="
         () => {
-          emit(
-            'update:modelValue',
-            (props.modelValue || []).filter(
-              (v) => v !== '/bucket/' + file.name,
-            ),
-          );
+          value.splice(value.indexOf('/bucket/' + file.name), 1);
         }
       "
-      :added="modelValue.includes('/bucket/' + file.name)"
+      :added="value.includes('/bucket/' + file.name)"
       :file="file"
     />
   </div>
@@ -37,14 +29,14 @@ import { compressImage } from "lost-compressor";
 const mainStore = useMainStore();
 
 const emit = defineEmits<{
-  (e: "update:modelValue", value: string[]): void;
   (e: "close"): void;
 }>();
 
 const props = defineProps<{
-  modelValue: string[];
   accept: "image";
 }>();
+
+const value = defineModel<string[]>({ default: [] });
 
 const files = computed<FileInfo[]>(() => {
   return Object.keys(mainStore.map.files || {})
@@ -66,25 +58,28 @@ const uploadFiles = () => {
   const input = document.createElement("input");
   input.type = "file";
   input.multiple = true;
-  input.accept = "image/*,image/heic,image/heif";
+  input.accept = "image/jpg, image/jpeg, image/png";
 
   input.onchange = async (e) => {
-    const target = e.target as HTMLInputElement;
-    if (!target.files) return;
-    const files = Array.from(target.files);
-    const compressedImages = [];
-    for (let i = 0; i < files.length; i++) {
-      const image = files[i];
-      const compressedImage = await compressImage(image, 2048, 0.8, "jpeg");
-      if (!compressedImage) continue;
-      compressedImages.push(compressedImage);
+    try {
+      const target = e.target as HTMLInputElement;
+      if (!target.files) return;
+      const files = Array.from(target.files);
+      const compressedImages = [];
+      for (let i = 0; i < files.length; i++) {
+        const image = files[i];
+        const compressedImage = await compressImage(image, 2048, 0.8, "jpeg");
+        if (!compressedImage) {
+          console.error("Failed to compress image: " + image.name);
+          continue;
+        }
+        compressedImages.push(compressedImage);
+      }
+      let fileURLs = await mainStore.uploadFiles(compressedImages, "image");
+      value.value = value.value.concat(fileURLs);
+    } catch (e) {
+      alert(e);
     }
-    let names = await mainStore.uploadFiles(compressedImages, "image");
-    const convertedNames = names.map((name) => `/bucket/${name}`);
-    emit("update:modelValue", [
-      ...(props.modelValue as string[]),
-      ...convertedNames,
-    ]);
   };
   input.click();
 };

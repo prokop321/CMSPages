@@ -49,10 +49,11 @@ const spaceID = computed(() => useRoute().params.id as string);
 const contentID = computed(() => useRoute().params.contentID as string);
 const home = computed(() => useRoute().path === "/");
 
-const saving = ref(false);
-
 const mainStore = useMainStore();
 
+const { unsavedChanges } = storeToRefs(mainStore);
+
+const saving = ref(false);
 const save = async () => {
   if (saving.value) return;
   saving.value = true;

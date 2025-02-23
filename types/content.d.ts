@@ -46,10 +46,12 @@ type Spaces = {
 
 type Space = {
   [key: string]: {
-    [key: string]:
-      | string
-      | number
-      | string[]
-      | { day: 0 | 1 | 2 | 3 | 4 | 5 | 6; start: number; duration: number }[];
+    [key: string]: string | number | string[] | TWeekSchedule;
   };
+};
+
+type TWeekSchedule = {
+  day: 0 | 1 | 2 | 3 | 4 | 5 | 6;
+  start: number;
+  duration: number;
 };

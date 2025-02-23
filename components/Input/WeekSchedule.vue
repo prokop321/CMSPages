@@ -72,11 +72,7 @@ defineProps<{
   title: string;
 }>();
 
-const value = defineModel<{
-  day: number;
-  start: number;
-  duration: number;
-}>();
+const value = defineModel<TWeekSchedule>();
 
 const weekDays = [
   "Monday",
