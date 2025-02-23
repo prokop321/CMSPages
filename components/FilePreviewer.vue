@@ -1,5 +1,5 @@
 <template>
-  <div class="relative aspect-square w-full overflow-hidden rounded bg-fill">
+  <div class="relative size-96 overflow-hidden rounded bg-fill">
     <img
       class="h-full w-full object-contain"
       :src="mainStore.filePreviewer('/bucket/' + file.name)"

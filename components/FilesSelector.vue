@@ -5,13 +5,13 @@
   </div>
   <div class="flex flex-wrap gap-2">
     <FilePreviewer
-      :key="file.key"
+      :key="file.name"
       v-for="file in files"
       @add="
         () => {
           emit('update:modelValue', [
             ...(props.modelValue || []),
-            '/bucket/' + file.key,
+            '/bucket/' + file.name,
           ]);
         }
       "
@@ -19,11 +19,13 @@
         () => {
           emit(
             'update:modelValue',
-            (props.modelValue || []).filter((v) => v !== '/bucket/' + file.key),
+            (props.modelValue || []).filter(
+              (v) => v !== '/bucket/' + file.name,
+            ),
           );
         }
       "
-      :added="modelValue.includes('/bucket/' + file.key)"
+      :added="modelValue.includes('/bucket/' + file.name)"
       :file="file"
     />
   </div>
@@ -44,15 +46,15 @@ const props = defineProps<{
   accept: "image";
 }>();
 
-const files = computed<fileInfo[]>(() => {
+const files = computed<FileInfo[]>(() => {
   return Object.keys(mainStore.map.files || {})
     .filter((f) => {
       return mainStore.map.files[f].type === props.accept;
     })
     .sort((a, b) => mainStore.map.files[b].added - mainStore.map.files[a].added)
     .map((f) => {
-      const file: fileInfo = {
-        key: f,
+      const file: FileInfo = {
+        name: f,
         added: mainStore.map.files[f].added,
         type: props.accept,
       };
