@@ -3,9 +3,9 @@ export default defineNuxtRouteMiddleware((to, from) => {
   const mainStore = useMainStore();
 
   if (
-    !mainStore.cmsConfig.ghKey ||
-    !mainStore.cmsConfig.ghRepo ||
-    !mainStore.cmsConfig.ghUser
+    !mainStore.cmsConfig.default.ghKey ||
+    !mainStore.cmsConfig.default.ghRepo ||
+    !mainStore.cmsConfig.default.ghUser
   ) {
     useRouter().replace("/setup");
   }

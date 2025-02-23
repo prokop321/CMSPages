@@ -55,16 +55,18 @@ definePageMeta({
 });
 
 const ghREPONAME = ref(
-  mainStore.cmsConfig.ghUser || mainStore.cmsConfig.ghRepo
-    ? mainStore.cmsConfig.ghUser + "/" + mainStore.cmsConfig.ghRepo
+  mainStore.cmsConfig.default.ghUser || mainStore.cmsConfig.default.ghRepo
+    ? mainStore.cmsConfig.default.ghUser +
+        "/" +
+        mainStore.cmsConfig.default.ghRepo
     : "",
 );
-const ghTOKEN = ref(mainStore.cmsConfig.ghKey || "");
+const ghTOKEN = ref(mainStore.cmsConfig.default.ghKey || "");
 
 const save = () => {
-  mainStore.cmsConfig.ghUser = ghREPONAME.value.split("/")[0];
-  mainStore.cmsConfig.ghRepo = ghREPONAME.value.split("/")[1];
-  mainStore.cmsConfig.ghKey = ghTOKEN.value;
+  mainStore.cmsConfig.default.ghUser = ghREPONAME.value.split("/")[0];
+  mainStore.cmsConfig.default.ghRepo = ghREPONAME.value.split("/")[1];
+  mainStore.cmsConfig.default.ghKey = ghTOKEN.value;
   useRouter().replace("/");
 };
 </script>

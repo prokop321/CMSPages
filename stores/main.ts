@@ -2,9 +2,11 @@ import axios from "axios";
 
 export const useMainStore = defineStore("main", () => {
   const cmsConfig = reactive({
-    ghUser: "",
-    ghRepo: "",
-    ghKey: "",
+    default: {
+      ghUser: "",
+      ghRepo: "",
+      ghKey: "",
+    },
   });
 
   const unsavedChanges = ref(false);
@@ -14,7 +16,11 @@ export const useMainStore = defineStore("main", () => {
   const spaces = ref<Spaces>({});
 
   const appPrefix = computed(
-    () => "https://" + cmsConfig.ghUser + ".github.io/" + cmsConfig.ghRepo,
+    () =>
+      "https://" +
+      cmsConfig.default.ghUser +
+      ".github.io/" +
+      cmsConfig.default.ghRepo,
   );
 
   const loadContent = async (id: string): Promise<Space | false> => {
@@ -22,9 +28,9 @@ export const useMainStore = defineStore("main", () => {
       if (spaces.value[id]) return spaces.value[id];
       const contentFetch = await axios(
         "https://" +
-          cmsConfig.ghUser +
+          cmsConfig.default.ghUser +
           ".github.io/" +
-          cmsConfig.ghRepo +
+          cmsConfig.default.ghRepo +
           "/content/" +
           id +
           ".json",
@@ -135,9 +141,9 @@ export const useMainStore = defineStore("main", () => {
         bucket: bucket.value,
       },
       {
-        ghKey: cmsConfig.ghKey,
-        ghUser: cmsConfig.ghUser,
-        ghRepo: cmsConfig.ghRepo,
+        ghKey: cmsConfig.default.ghKey,
+        ghUser: cmsConfig.default.ghUser,
+        ghRepo: cmsConfig.default.ghRepo,
       },
     );
   };
@@ -156,9 +162,9 @@ export const useMainStore = defineStore("main", () => {
       try {
         const mapFetch = await axios(
           "https://" +
-            cmsConfig.ghUser +
+            cmsConfig.default.ghUser +
             ".github.io/" +
-            cmsConfig.ghRepo +
+            cmsConfig.default.ghRepo +
             "/map.app.json?time=" +
             Date.now(),
           {},
